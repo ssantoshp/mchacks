@@ -3,7 +3,7 @@ from sqlalchemy.types import Date
 from sqlalchemy_imageattach.context import store_context
 from sqlalchemy_imageattach.stores.fs import HttpExposedFileSystemStore
 
-import models, schemas
+from . import models, schemas
 
 
 def get_snap_resp(db: Session, snap_db: models.FoodSnap, fs_store: HttpExposedFileSystemStore) -> schemas.FoodSnapResponse:

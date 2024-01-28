@@ -3,7 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from sqlalchemy_imageattach.entity import Image, image_attachment
 
-from database import Base
+from .database import Base
 
 
 class FoodSnap(Base):

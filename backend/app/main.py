@@ -3,24 +3,30 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 import datetime
 
+from functools import lru_cache
+from typing_extensions import Annotated
 from sqlalchemy_imageattach.stores.fs import HttpExposedFileSystemStore
-from sqlalchemy_imageattach.context import pop_store_context, push_store_context
 
-import crud, models, schemas
-from database import SessionLocal, engine
+from . import crud, models, schemas, config
+from .database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
 
+# App config
+@lru_cache
+def get_settings():
+    return config.Settings()
+
+
 # Mount static files
 app.mount("/static", StaticFiles(directory="static", html=True), name="static")
-
 fs_store = HttpExposedFileSystemStore(
     path="static",
     prefix="static/",
-    host_url_getter=lambda: "http://localhost:8000"
+    host_url_getter=lambda: get_settings().host_url
 )
 
 # Dependency
@@ -64,3 +70,12 @@ def create_food_snap(food_pic: schemas.FoodPictureCreate, db: Session = Depends(
 
     # For now, I will just create a dummy food snap
     return crud.create_dummy_food_snap(db, fs_store).id
+
+
+@app.get("/info")
+async def info(settings: Annotated[config.Settings, Depends(get_settings)]):
+    return {
+        "app_name": settings.app_name,
+        "admin_email": settings.admin_email,
+        "host_url": settings.host_url,
+    }
