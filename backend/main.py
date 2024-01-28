@@ -1,14 +1,27 @@
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
-from datetime import datetime
+import datetime
 
-from . import crud, models, schemas
-from .database import SessionLocal, engine
+from sqlalchemy_imageattach.stores.fs import HttpExposedFileSystemStore
+from sqlalchemy_imageattach.context import pop_store_context, push_store_context
+
+import crud, models, schemas
+from database import SessionLocal, engine
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="static", html=True), name="static")
+
+fs_store = HttpExposedFileSystemStore(
+    path="static",
+    prefix="static/",
+    host_url_getter=lambda: "http://localhost:8000"
+)
 
 # Dependency
 def get_db():
@@ -19,56 +32,35 @@ def get_db():
         db.close()
 
 
-@app.get('/foodsnaps/{snap_id}', response_model=schemas.FoodSnap)
+# Endpoints
+@app.get('/foodsnaps/{snap_id}', response_model=schemas.FoodSnapResponse)
 def get_food_snap(snap_id: int, db: Session = Depends(get_db)):
     db_snap = crud.get_food_snap(db, snap_id)
     if db_snap is None:
         raise HTTPException(status_code=404, detail="Snap not found")
-    return db_snap
+    return crud.get_snap_resp(db, db_snap, fs_store)
 
-@app.get('/foodsnaps/', response_model=list[schemas.FoodSnap])
+
+@app.get('/foodsnaps/', response_model=list[schemas.FoodSnapResponse])
 def get_food_snaps(
-    start_date: datetime.date | None = None,
+    start_date: datetime.date = None,
     limit: int = 100,
     db: Session = Depends(get_db)
 ):
     if start_date is None:
-        start_date = datetime.now().date()
+        start_date = datetime.datetime.now().date()
 
-    db_snaps = crud.get_food_snaps_by_dt(db, datetime, limit)
+    db_snaps = crud.get_food_snaps_by_dt(db, start_date, limit, fs_store)
     return db_snaps
 
 
-# @app.post("/users/", response_model=schemas.User)
-# def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-#     db_user = crud.get_user_by_email(db, email=user.email)
-#     if db_user:
-#         raise HTTPException(status_code=400, detail="Email already registered")
-#     return crud.create_user(db=db, user=user)
+@app.post('/foodsnaps/', response_model=int)
+def create_food_snap(food_pic: schemas.FoodPictureCreate, db: Session = Depends(get_db)):
+    """TODO
+    1. Add logic to create segmentations from the food picture
+    2. Add logic to create intake entries for each segmentation
+    3. Create a new food snap with the intake entries and the food picture
+    """
 
-
-# @app.get("/users/", response_model=list[schemas.User])
-# def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-#     users = crud.get_users(db, skip=skip, limit=limit)
-#     return users
-
-
-# @app.get("/users/{user_id}", response_model=schemas.User)
-# def read_user(user_id: int, db: Session = Depends(get_db)):
-#     db_user = crud.get_user(db, user_id=user_id)
-#     if db_user is None:
-#         raise HTTPException(status_code=404, detail="User not found")
-#     return db_user
-
-
-# @app.post("/users/{user_id}/items/", response_model=schemas.Item)
-# def create_item_for_user(
-#     user_id: int, item: schemas.ItemCreate, db: Session = Depends(get_db)
-# ):
-#     return crud.create_user_item(db=db, item=item, user_id=user_id)
-
-
-# @app.get("/items/", response_model=list[schemas.Item])
-# def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-#     items = crud.get_items(db, skip=skip, limit=limit)
-#     return items
+    # For now, I will just create a dummy food snap
+    return crud.create_dummy_food_snap(db, fs_store).id

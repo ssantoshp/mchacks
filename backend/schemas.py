@@ -1,4 +1,4 @@
-from typing import Union
+import datetime
 
 from pydantic import BaseModel
 
@@ -29,34 +29,40 @@ class FoodPicture(FoodPictureBase):
 
 class IntakeEntryBase(BaseModel):
     name: str
-    food_seg: FoodSegmentation
     serving_size: float
     calories: float
-    protein: float
+    proteins: float
     fat: float
     carbs: float
 
 class IntakeEntryCreate(IntakeEntryBase):
-    pass
+    food_seg: FoodSegmentation
 
 class IntakeEntry(IntakeEntryBase):
     id: int
-    created_at: str
-    updated_at: str
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
     snap_id: int
     class Config:
         orm_mode = True
+
+class IntakeEntryResponse(IntakeEntry):
+    food_seg: str
 
 
 class FoodSnapBase(BaseModel):
     pass
 
 class FoodSnapCreate(FoodSnapBase):
-    food_pic: FoodPicture
+    food_pic: str
 
 class FoodSnap(FoodSnapBase):
     id: int
-    created_at: str
+    created_at: datetime.datetime
     food_entries: list[IntakeEntry] = []
     class Config:
         orm_mode = True
+
+class FoodSnapResponse(FoodSnap):
+    food_pic: str
+    food_entries: list[IntakeEntryResponse] = []

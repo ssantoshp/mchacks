@@ -1,9 +1,9 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, DateTime
+from sqlalchemy import Column, ForeignKey, Integer, String, Float, DateTime
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from sqlalchemy_imageattach.entity import Image, image_attachment
 
-from .database import Base
+from database import Base
 
 
 class FoodSnap(Base):
@@ -34,15 +34,14 @@ class IntakeEntry(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
-    food_seg = image_attachment("FoodSegmentation", uselist=False, back_populates="intake_entry")
-
     serving_size = Column(Float, nullable=False, default=0)
     calories = Column(Float, nullable=False, default=0)
     carbs = Column(Float, nullable=False, default=0)
     proteins = Column(Float, nullable=False, default=0)
     fat = Column(Float, nullable=False, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     snap_id = Column(Integer, ForeignKey("food_snaps.id"))
     snap = relationship("FoodSnap", back_populates="food_entries")
+    food_seg = image_attachment("FoodSegmentation", uselist=False, back_populates="intake_entry")
