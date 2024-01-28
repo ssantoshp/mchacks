@@ -88,19 +88,45 @@ async def create_food_snap(food_pic: UploadFile = File(...), db: Session = Depen
     """
     print('received file: ', food_pic.filename)
 
-    if food_pic.content_type not in ['image/jpeg', 'image/png']:
-        raise HTTPException(status_code=400, detail="File must be an image")
+    # if food_pic.content_type not in ['image/jpeg', 'image/png']:
+    #     raise HTTPException(status_code=400, detail="File must be an image")
     
     img = await util.read_img(food_pic)
+    #print(img.shape)
     
     # get masks using fastsam
     masks = await util.get_masks(img, ml_models["fastsam"])
 
+    print(masks.shape)
+
     # apply masks on the image
     segmented_imgs = await util.apply_masks_on_img(food_pic.file, masks)
 
+    print(len(segmented_imgs))
+
+    # get captions using yolov8
+    captions = await util.get_captions(segmented_imgs, ml_models["yolo"])
+
+    print(captions)
+
+    # get depth map of image
+    # TODO: put higher up?
+    depth_map = await get_depth_map(
+    # calculate volume of shit
+    volumes = [await util.compute_volume(mask
+
+    # get nutrition info using api
+    nutrition_info = await util.get_nutrition_info(
+        captions,
+        get_settings().calorie_ninja_api_key
+    )
+
+    print(nutrition_info)
+
+    assert len(segmented_imgs) == len(nutrition_info)
+
     # For now, I will just create a dummy food snap
-    return crud.create_dummy_food_snap(db, fs_store).id
+    return crud.create_food_snap(db, img, segmented_imgs, nutrition_info, fs_store).id
 
 
 @app.get("/info")
