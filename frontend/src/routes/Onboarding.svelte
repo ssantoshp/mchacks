@@ -58,6 +58,8 @@
         return !isNaN(value) && (Number(value) == value);
     }
 
+
+
 </script>
 
 <TailwindCss/>
