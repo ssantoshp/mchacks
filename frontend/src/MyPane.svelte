@@ -27,13 +27,7 @@
   </script>
   
   <div bind:this={paneElement}>
-    <!-- Slot for custom content -->
     <slot></slot>
   </div>
   
-  <style>
-    .pane {
-      /* Styles for your pane container */
-    }
-  </style>
   

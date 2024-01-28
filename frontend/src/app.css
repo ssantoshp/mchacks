@@ -2,16 +2,19 @@
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+} 
+
+body {
+  overflow-y: hidden; /* Hide vertical scrollbar */
+  overflow-x: hidden; /* Hide horizontal scrollbar */
 }
 
 a {
@@ -34,10 +37,6 @@ body {
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
-}
-
-.card {
-  padding: 2em;
 }
 
 #app {
@@ -73,45 +72,96 @@ button {
 }
 
 .container {
-display: grid;
-grid-template-areas: 
-  'header header'
-  'image  image'
-  'calories carbs'
-  'fats   protein';
-grid-template-columns: 1fr 1fr; 
-grid-template-rows: auto auto 1fr 1fr; 
-gap: 10px; 
-margin: 25px;
+  display: grid;
+  width: 90%; 
+  margin: 0 auto;
+  grid-template-areas: 
+    'header header'
+    'image  image'
+    'calories carbs'
+    'fats   protein'
+    'ingredients ingredients';
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto 1fr 1fr auto;
 }
 
-.header, .image{
-  padding: 10px;
-}
 
 .header {
   grid-area: header;
+  padding: 10px;
   text-align: left;
+  margin: 10px 0px 10px 10px;
 }
 
 .image {
   grid-area: image;
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+  width: 100%; 
+  overflow: hidden; 
+  margin-bottom: 20px;
+}
+
+.image img {
+  width: 100%; 
+  height: auto;
+  border-radius: 0.5rem;
+  max-width: 90%; 
 }
 
 .calories {
+  background-image: linear-gradient(180deg,#ff418a,#FF0060); 
+  border: 1px solid #e10056;
+  text-decoration: none; 
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); 
   grid-area: calories;
 }
 
 .carbs {
+  background-image: linear-gradient(180deg,#ffdc50,#ffcd04); 
+  border: 1px solid #e4c600;
+  text-decoration: none; 
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); 
   grid-area: carbs;
 }
 
 .fats {
+  background-image: linear-gradient(180deg,#20ffc3,#00DFA2); 
+  border: 1px solid #00d99f;
+  text-decoration: none; 
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); 
   grid-area: fats;
 }
 
 .protein {
+  background-image: linear-gradient(180deg,#3191ff,#0079FF); 
+  border: 1px solid #006ce8;
+  text-decoration: none; 
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); 
   grid-area: protein;
+}
+
+.carbs, .fats, .protein, .calories {
+  color: white;
+  font-weight: bold;
+  margin: 10px;
+  border-radius: 20px;
+  padding: 10px;
+  height: 20vh;
+  width: auto;
+  display: flex;
+  flex-direction: column; 
+  align-items: flex-start;
+  justify-content: flex-start; 
+  padding: 10px; 
+}
+
+.ingredients {
+  grid-area: ingredients;
+  padding: 10px;
+  text-align: left;
+  margin: 10px 0px 10px 10px;
 }
 
 .loading::after {
@@ -127,3 +177,4 @@ margin: 25px;
     75%  { content: '...'; }
     100% { content: ''; }
 }
+
